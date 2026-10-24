@@ -1,0 +1,330 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Digivertising design tokens
+   Colour, type, spacing, radius, shadow and motion live here so the
+   whole site can be re-themed from one place. See docs/brand.md.
+   ------------------------------------------------------------------ */
+@theme {
+  /* Surfaces (dark corporate base) */
+  --color-ink-950: #05080f;
+  --color-ink-900: #0a1020;
+  --color-ink-800: #0f1830;
+  --color-ink-700: #17233f;
+  --color-ink-600: #22304f;
+
+  /* Text */
+  --color-fg: #eef2fa;
+  --color-muted: #a3aec5;
+  --color-subtle: #7c89a6;
+
+  /* Accents: Signal Blue + Pulse Cyan */
+  --color-signal-300: #9db6ff;
+  --color-signal-400: #7096ff;
+  --color-signal-500: #4c7dff;
+  --color-signal-600: #3561e8;
+  --color-pulse-300: #67e8f9;
+  --color-pulse-400: #22d3ee;
+  --color-pulse-500: #06b6d4;
+
+  /* Status */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+
+  /* Lines */
+  --color-line: rgb(148 163 200 / 0.14);
+  --color-line-strong: rgb(148 163 200 / 0.28);
+
+  /* Typography (font variables are set by next/font in the root layout) */
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+
+  /* Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  /* Shadows */
+  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 20px 40px -24px rgb(0 0 0 / 0.6);
+  --shadow-glow: 0 0 0 1px rgb(76 125 255 / 0.3), 0 12px 40px -12px rgb(76 125 255 / 0.55);
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 500ms;
+}
+
+/* Fluid type scale */
+@utility text-display {
+  font-family: var(--font-display);
+  font-size: clamp(2.375rem, 1.5rem + 3vw, 4rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  font-weight: 650;
+}
+@utility text-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.125rem, 1.5rem + 2.4vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  font-weight: 650;
+}
+@utility text-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.625rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  font-weight: 650;
+}
+@utility text-h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+@utility text-lead {
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.65;
+  color: var(--color-muted);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+  /* Arabic: no negative tracking, slightly taller lines */
+  [dir="rtl"] {
+    letter-spacing: 0 !important;
+  }
+  [dir="rtl"] :is(h1, h2, h3, .text-display, .text-h1, .text-h2, .text-h3) {
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
+  ::selection {
+    background: rgb(76 125 255 / 0.45);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-pulse-400);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 640px) {
+    .container-page {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .section {
+    padding-block: clamp(4rem, 3rem + 4vw, 7rem);
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-pulse-300);
+  }
+  [dir="rtl"] .eyebrow {
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 0.9375rem;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.5rem;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-signal-500), var(--color-pulse-400));
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.875rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    transition:
+      transform var(--duration-fast) var(--ease-out-expo),
+      box-shadow var(--duration-base) var(--ease-out-expo),
+      background-color var(--duration-base),
+      border-color var(--duration-base);
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn-primary {
+    color: var(--color-ink-950);
+    background-image: linear-gradient(110deg, #6a95ff 0%, #4c7dff 45%, #3fd5f0 100%);
+    box-shadow: var(--shadow-glow);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 0 1px rgb(103 232 249 / 0.5), 0 16px 48px -12px rgb(34 211 238 / 0.6);
+  }
+  .btn-secondary {
+    color: var(--color-fg);
+    background: rgb(255 255 255 / 0.04);
+    border: 1px solid var(--color-line-strong);
+  }
+  .btn-secondary:hover {
+    background: rgb(255 255 255 / 0.08);
+    border-color: rgb(157 182 255 / 0.5);
+  }
+
+  .card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgb(23 35 63 / 0.55), rgb(15 24 48 / 0.55));
+    border: 1px solid var(--color-line);
+    box-shadow: var(--shadow-card);
+  }
+  .card-interactive {
+    transition:
+      border-color var(--duration-base),
+      transform var(--duration-base) var(--ease-out-expo),
+      background-color var(--duration-base);
+  }
+  .card-interactive:hover,
+  .card-interactive:focus-within {
+    border-color: rgb(112 150 255 / 0.45);
+    transform: translateY(-2px);
+  }
+
+  .glass {
+    background: rgb(10 16 32 / 0.72);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+  }
+
+  .text-gradient {
+    background-image: linear-gradient(100deg, var(--color-signal-300), var(--color-pulse-300));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .prose-legal h2 {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .prose-legal p,
+  .prose-legal li {
+    color: var(--color-muted);
+    line-height: 1.75;
+  }
+  .prose-legal ul {
+    list-style: disc;
+    padding-inline-start: 1.25rem;
+    margin-block: 0.75rem;
+  }
+}
+
+/* Background decoration: a subtle technical grid with a soft glow */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(148 163 200 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(148 163 200 / 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+}
+
+/* Restrained scroll reveal. Pure CSS; content is fully visible where unsupported. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+}
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* AI workforce diagram: flowing signal along connectors */
+@keyframes signal-flow {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+@keyframes node-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+.signal-line {
+  stroke-dasharray: 4 6;
+  animation: signal-flow 1.6s linear infinite;
+}
+.node-pulse {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: node-pulse 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Arabic pages use IBM Plex Sans Arabic for headings and body text. */
+html[lang="ar"] {
+  --font-body: var(--font-arabic);
+  --font-heading: var(--font-arabic);
+}

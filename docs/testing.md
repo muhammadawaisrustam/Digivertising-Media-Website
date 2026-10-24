@@ -1,0 +1,58 @@
+# Testing
+
+## How to run
+
+```bash
+npm run check        # lint + type check + unit tests (fast)
+npm run build        # production build, also validates all content
+npm run test:e2e     # browser tests against the production build (desktop + mobile)
+```
+
+## What is covered (Phase 1)
+
+**Unit tests (Vitest, `tests/unit/`)**
+- Service content: all 24 required services exist once, related links are valid, titles and descriptions are unique, no guarantee claims, Arabic text is Arabic, proxy slug list matches content.
+- Language paths: English unprefixed, Arabic under `/ar`, switching keeps the same page.
+- Dictionaries: Arabic has exactly the same keys and list lengths as English.
+- Proxy: English rewrite, Arabic pass-through, `/en` redirect, unknown services go to 404.
+
+**Browser tests (Playwright, `tests/e2e/`), each on desktop Chrome and a Pixel 7 profile**
+- Homepage loads without console errors; main navigation reaches Services, About, Contact.
+- Service explorer tabs work with mouse and keyboard.
+- All 24 service pages return 200 in both languages with the right `lang`.
+- Unknown URLs return a real 404 status and a helpful page.
+- Arabic: `lang="ar"`, `dir="rtl"`, translated navigation, mirrored layout, no horizontal overflow; language switcher keeps the current page.
+- Mobile menu: opens, closes with Escape, returns focus to the button; no horizontal overflow on key pages.
+- 3D fallback: reduced motion keeps the static globe and loads no canvas; the page is complete with JavaScript disabled.
+- Accessibility: no serious or critical axe-core (WCAG 2 A/AA) violations on 6 key pages.
+- SEO: title, description, single `h1`, canonical, `hreflang` en/ar/x-default and Open Graph on 12 page variants; sitemap (56 URLs with alternates); robots.txt; draft legal pages are `noindex` and not in the sitemap; structured data parses and contains no ratings, reviews or addresses; no broken internal links on key pages.
+
+## Latest results (2026-10-24, cloud workspace, production build)
+
+| Check | Result |
+| --- | --- |
+| `npm run lint` | Pass, 0 problems |
+| `npm run typecheck` | Pass |
+| Unit tests | 17 / 17 passed |
+| `npm run build` | Pass, 60 public pages prerendered |
+| Browser tests | 51 passed, 0 failed. 19 skipped by design (mobile-only tests on desktop and duplicate metadata tests on mobile) |
+
+### Lighthouse 12 (local production server, same machine)
+
+These are lab measurements in a cloud container, not real-user data. "Mobile" uses Lighthouse's simulated slow 4G and CPU throttling. Results vary by a few points between runs.
+
+| Page | Device | Performance | Accessibility | Best practices | SEO | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `/` | Desktop | 100 | 100 | 100 | 100 | 0.3 s | 0.6 s | 20 ms | 0 |
+| `/` | Mobile | 96 | 100 | 100 | 100 | 0.9 s | 2.8 s | 60 ms | 0 |
+| `/ar` | Mobile | 86 | 100 | 100 | 100 | 2.4 s | 3.4 s | 170 ms | 0.002 |
+| `/services/seo` | Mobile | 98 | 100 | 100 | 100 | 0.8 s | 2.3 s | 40 ms | 0 |
+
+**Against the targets** (LCP ≤ 2.5 s, CLS ≤ 0.1): CLS meets the target everywhere. Desktop LCP meets it. Simulated mobile LCP is slightly above target on the English homepage (2.8 s) and the Arabic homepage (3.4 s). In both cases the LCP element is the hero heading waiting for its web font. INP cannot be measured in a lab; Total Blocking Time is low.
+
+What was already done: phones skip the WebGL scene (the first mobile run, before this change, scored 66 with 1,570 ms blocking time), the 3D code only downloads after the page is idle, and the Arabic font is not preloaded on English pages (preloading it made English LCP worse, 3.7 s). Next options, to evaluate before launch: self-host a subset of the heading fonts, or use a system font for the hero heading on mobile. Real-user Core Web Vitals should be checked in Search Console after launch.
+
+## Known limits of the test setup
+
+- WebGL in the cloud container is software-rendered, so 3D performance numbers here are pessimistic for real devices.
+- Database, login and form tests arrive with those features (Phases 2 to 3).
