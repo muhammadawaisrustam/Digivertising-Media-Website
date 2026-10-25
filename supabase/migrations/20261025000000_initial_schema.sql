@@ -30,7 +30,7 @@ as $$
   );
 $$;
 
-revoke all on function public.current_role_is(public.app_role[]) from public;
+revoke all on function public.current_role_is(public.app_role[]) from public, anon;
 grant execute on function public.current_role_is(public.app_role[]) to authenticated;
 
 -- New sign-ups get a viewer profile. Roles are raised by an owner only.
@@ -45,6 +45,8 @@ begin
   return new;
 end;
 $$;
+
+revoke all on function public.handle_new_user() from public, anon, authenticated;
 
 create trigger on_auth_user_created
   after insert on auth.users
