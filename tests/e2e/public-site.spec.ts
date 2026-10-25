@@ -61,6 +61,12 @@ test.describe("public website", () => {
   });
 });
 
+test("contact page and footer show the business email", async ({ page }) => {
+  await page.goto("/contact");
+  await expect(page.locator("main").getByRole("link", { name: "awaisrustam001@gmail.com" })).toHaveAttribute("href", "mailto:awaisrustam001@gmail.com");
+  await expect(page.getByRole("contentinfo").getByRole("link", { name: "awaisrustam001@gmail.com" })).toBeVisible();
+});
+
 test.describe("Arabic and right-to-left layout", () => {
   test("Arabic pages use lang=ar, dir=rtl and translated navigation", async ({ page, isMobile }) => {
     await page.goto("/ar");

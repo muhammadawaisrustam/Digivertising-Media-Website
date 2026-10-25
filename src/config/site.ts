@@ -10,8 +10,8 @@ export const siteConfig = {
   shortName: "Digivertising",
   /** Public base URL. Set NEXT_PUBLIC_SITE_URL once a domain is confirmed. */
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
-  /** Public business email. Not confirmed yet, so it is hidden on the site. */
-  contactEmail: null as string | null,
+  /** Public business email. Temporary until a domain email exists (owner-approved). */
+  contactEmail: "awaisrustam001@gmail.com" as string | null,
   /** Public social profile URLs (used in footer and Organization schema). */
   socialProfiles: [] as string[],
 } as const;

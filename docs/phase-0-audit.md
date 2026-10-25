@@ -29,7 +29,7 @@ Audit date: 2026-10-24. Everything below was checked, not assumed.
 | Missing | Needed for | Owner action? |
 | --- | --- | --- |
 | GitHub repository | Saving work permanently, version history | Yes: create `digivertising-website` (private, empty) |
-| Business email and social links | Contact page, footer, Organization schema | Yes: tell us which to publish |
+| Social links | Footer, Organization schema | Yes: tell us which to publish. (Email: owner chose awaisrustam001@gmail.com for now, to replace with a domain email later.) |
 | Domain | Canonical URLs, sitemap, launch | Later; decide before deployment |
 | New Supabase project | Leads, page editor, studio login (Phase 2 to 3) | Yes, with approval; step-by-step guide will be provided |
 | Free AI provider | AI editing, quotation assistant, agents (Phase 2 and 4) | Yes, choose after we compare current free tiers |

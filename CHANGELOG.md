@@ -11,4 +11,4 @@
 - Accessible service explorer, mobile menu with focus management, animated AI-workforce diagram.
 - SEO foundations: per-page titles and descriptions, canonical URLs, hreflang alternates, Open Graph, sitemap with language alternates, robots.txt, Organization/WebSite/Service/BreadcrumbList structured data.
 - Baseline security headers.
-- 17 unit tests and 51 browser tests (desktop + mobile), including axe accessibility checks.
+- 17 unit tests and 53 browser tests (desktop + mobile), including axe accessibility checks.

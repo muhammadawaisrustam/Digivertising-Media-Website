@@ -35,7 +35,7 @@ npm run test:e2e     # browser tests against the production build (desktop + mob
 | `npm run typecheck` | Pass |
 | Unit tests | 17 / 17 passed |
 | `npm run build` | Pass, 60 public pages prerendered |
-| Browser tests | 51 passed, 0 failed. 19 skipped by design (mobile-only tests on desktop and duplicate metadata tests on mobile) |
+| Browser tests | 53 passed, 0 failed. 19 skipped by design (mobile-only tests on desktop and duplicate metadata tests on mobile) |
 
 ### Lighthouse 12 (local production server, same machine)
 

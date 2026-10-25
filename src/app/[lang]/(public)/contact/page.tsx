@@ -39,7 +39,7 @@ export default async function ContactPage() {
             {siteConfig.contactEmail ? (
               <p className="mt-6">
                 <span className="block text-sm text-subtle">{c.emailHeading}</span>
-                <a href={`mailto:${siteConfig.contactEmail}`} className="text-lg font-semibold text-signal-300 hover:underline">
+                <a href={`mailto:${siteConfig.contactEmail}`} dir="ltr" className="text-lg font-semibold text-signal-300 hover:underline">
                   {siteConfig.contactEmail}
                 </a>
               </p>

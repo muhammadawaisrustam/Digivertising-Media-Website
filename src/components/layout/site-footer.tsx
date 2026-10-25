@@ -26,7 +26,7 @@ export async function SiteFooter({ locale, t }: { locale: Locale; t: Dictionary 
           <Logo />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">{t.footer.tagline}</p>
           {siteConfig.contactEmail ? (
-            <a href={`mailto:${siteConfig.contactEmail}`} className="mt-4 inline-block text-sm text-signal-300 hover:underline">
+            <a href={`mailto:${siteConfig.contactEmail}`} dir="ltr" className="mt-4 inline-block text-sm text-signal-300 hover:underline">
               {siteConfig.contactEmail}
             </a>
           ) : null}
