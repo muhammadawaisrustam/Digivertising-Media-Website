@@ -6,7 +6,7 @@ Audit date: 2026-10-24. Everything below was checked, not assumed.
 
 | Item | Finding |
 | --- | --- |
-| Project repository | None. The owner's GitHub account has two repositories (`target-kitchen-studio` and the personal `github.io` site). Neither is related, so neither was touched. A new private repository `digivertising-website` was requested from the owner. |
+| Project repository | None. The owner's GitHub account has two repositories (`target-kitchen-studio` and the personal `github.io` site). Neither is related, so neither was touched. The owner created a new repository, `Digivertising-Media-Website`, for this project. |
 | Working directory | Empty cloud workspace. No existing project files, so nothing could be overwritten. |
 | Node.js / npm | Node 22.22.0, npm 10.9.4 (pnpm and yarn also available; npm chosen as the simplest). |
 | Git | 2.43.0 |

@@ -23,10 +23,10 @@ Phase details: [docs/phase-0-audit.md](docs/phase-0-audit.md). Test results: [do
 You need **Node.js 22.12 or newer** ([download the LTS version](https://nodejs.org)) and **Git** ([download](https://git-scm.com/downloads)).
 
 1. Open a terminal (on Windows: "Terminal" or "PowerShell"; on Mac: "Terminal").
-2. Download the project (replace the address once the repository exists):
+2. Download the project:
    ```bash
-   git clone https://github.com/muhammadawaisrustam/digivertising-website.git
-   cd digivertising-website
+   git clone https://github.com/muhammadawaisrustam/Digivertising-Media-Website.git
+   cd Digivertising-Media-Website
    ```
 3. Install the packages (takes a minute or two the first time):
    ```bash
