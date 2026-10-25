@@ -1,6 +1,6 @@
-# Editing content (until the visual editor arrives)
+# Editing content
 
-The visual page editor comes in Phase 2. Until then, text lives in a few plain data files. Each change is checked automatically: if something is missing or too long, `npm run build` stops and tells you which file and field.
+The homepage, the About page and landing pages are edited in the studio at `/studio` (see [editor.md](editor.md)). Other text still lives in a few plain data files. Each change is checked automatically: if something is missing or too long, `npm run build` stops and tells you which file and field.
 
 ## Service pages: `src/content/services/`
 
@@ -23,9 +23,11 @@ Each service has an English (`en`) and Arabic (`ar`) block with the same fields:
 
 Adding a new service also requires adding its slug to `src/content/services/slugs.ts` (a test checks they match).
 
-## Menus, homepage, about and contact: `src/i18n/dictionaries/`
+## Menus, contact and form text: `src/i18n/dictionaries/` and `src/features/leads/form-copy.ts`
 
 `en.ts` and `ar.ts` must have exactly the same structure. TypeScript and a unit test will flag any missing Arabic text.
+
+The homepage and About text in the dictionaries is only the **built-in starting version**. Once you publish a page in the studio, the studio version is shown instead.
 
 ## Business details: `src/config/site.ts`
 

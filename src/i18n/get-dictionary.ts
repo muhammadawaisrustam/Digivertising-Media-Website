@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { lang } from "next/root-params";
 import { isLocale, type Locale } from "./config";
-import { ar } from "./dictionaries/ar";
-import { en, type Dictionary } from "./dictionaries/en";
+import type { Dictionary } from "./dictionaries/en";
+import { getDictionaryFor } from "./get-dictionary-static";
 
-const dictionaries: Record<Locale, Dictionary> = { en, ar };
+export { getDictionaryFor };
 
 /** Current language from the URL (/ar/... or the unprefixed English routes). Server-only. */
 export async function getLocale(): Promise<Locale> {
@@ -13,11 +13,7 @@ export async function getLocale(): Promise<Locale> {
   return value;
 }
 
-export function getDictionaryFor(locale: Locale): Dictionary {
-  return dictionaries[locale];
-}
-
 export async function getDictionary(): Promise<{ locale: Locale; t: Dictionary }> {
   const locale = await getLocale();
-  return { locale, t: dictionaries[locale] };
+  return { locale, t: getDictionaryFor(locale) };
 }

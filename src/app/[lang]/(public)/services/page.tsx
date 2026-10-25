@@ -66,7 +66,7 @@ export default async function ServicesPage() {
         </section>
       ))}
 
-      <CtaBand title={t.home.cta.title} text={t.home.cta.text} href={lp("/contact")} label={t.common.startProject} />
+      <CtaBand title={t.home.cta.title} text={t.home.cta.text} href={lp("/request-a-proposal")} label={t.common.startProject} />
     </>
   );
 }

@@ -10,12 +10,15 @@ src/
   app/
     [lang]/                   Root layout: <html lang dir>, fonts, global metadata
       (public)/               Public website shell (header, footer)
-        page.tsx              Homepage
-        about/ contact/ privacy/ terms/
+        page.tsx about/       Homepage and About, rendered from editable blocks
+        landing/[slug]/       Landing pages created in the studio
+        contact/ request-a-proposal/ privacy/ terms/
         services/ services/[slug]/
         not-found.tsx         Bilingual 404 page
         [...missing]/         Sends unknown URLs to the 404 page
-      (studio)/               Phase 3+: private workspace, own layout
+      (studio)/studio/        Private studio (noindex, English only)
+        (workspace)/          Dashboard, pages, editor, leads, login
+        preview/              Draft preview shown inside the editor
     sitemap.ts robots.ts manifest.ts
   components/
     brand/                    Logo
@@ -26,6 +29,13 @@ src/
   content/                    Business content as validated data (services, legal)
   i18n/                       Locales, path helpers, English/Arabic dictionaries
   config/site.ts              Business facts (name, URL, email, social links)
+  features/pages/             Block schema, built-in pages, page service, AI edit, diff
+  features/leads/             Form schemas, rule-based qualification, form components
+  features/studio/            Studio actions (all check the session) and editor UI
+  lib/database/               Storage interfaces + local file store (Supabase in Phase 3)
+  lib/auth/                   Temporary studio login (signed httpOnly cookie)
+  lib/ai/                     Provider-agnostic AI interface, test-only mock provider
+  lib/security/               Rate limiting, client IP
   lib/seo/                    Metadata, structured data and sitemap helpers
 tests/unit, tests/e2e         Vitest and Playwright tests
 ```
@@ -50,9 +60,37 @@ tests/unit, tests/e2e         Vitest and Playwright tests
 
 Service content is typed and validated with Zod (`src/content/services/schema.ts`). The build fails if an entry is missing a field, has a too-long meta description or links to a non-existent related service. This shape is designed to move into the database-backed page editor in Phase 2 and to be exportable to another CMS later.
 
+## Editable pages (Phase 2)
+
+- A page is `{ meta, blocks[] }` per language, validated by Zod (`src/features/pages/schema.ts`). 12 block types; see [editor.md](editor.md).
+- Storage keeps `published`, `draft` and up to 20 `revisions` per page and language. Saving only touches the draft. Publishing validates again, records a revision and calls `updateTag` so the cached public page refreshes immediately.
+- If nothing has been published, the built-in version (`seed.ts`, built from the dictionaries) is shown, so an empty database never breaks the site. A stored version that fails validation is ignored in favour of the built-in one.
+- Public pages read published content through a cached function (`'use cache'` + `cacheTag`).
+- Known limit: an unpublished landing page address returns the 404 page with a `noindex` tag but HTTP status 200 (partial prerendering streams the status before the page is known). Search engines will not index it. A proxy check will return a real 404 once Supabase is in place.
+
+## Forms and leads (Phase 2)
+
+- Contact form and the five-step proposal assistant share Zod schemas between browser (instant feedback) and server (the real check).
+- Spam protection: honeypot field, minimum fill time (3 s), rate limit (5 per 10 minutes per IP, in memory). IPs are not stored.
+- The proposal result is a deterministic, rule-based summary (areas involved, missing information, typical deliverables, discovery questions), clearly labelled as automated and not a quote. No AI and no prices.
+
+## Studio security (Phase 2, temporary)
+
+- One owner password (`STUDIO_PASSWORD`) and an HMAC-signed, httpOnly, SameSite=Strict session cookie (12 hours, `SESSION_SECRET`). Login is rate limited (5 attempts per 15 minutes).
+- Every studio page calls `requireStudio()` and every studio server action calls `assertStudio()`; hiding UI is never the protection.
+- Studio responses send `X-Robots-Tag: noindex` and the robots meta tag; only the preview route may be framed, and only by the site itself.
+- Replaced by Supabase Auth with roles and Row Level Security in Phase 3.
+
+## AI layer (Phase 2)
+
+- `src/lib/ai/` defines `generateStructuredOutput`, `generateText`, `checkAvailability` and `getConfigurationStatus`. Features never call a vendor directly.
+- With no `AI_PROVIDER`, features report "Not configured". There is no silent fallback to made-up output.
+- `AI_PROVIDER=mock` is a test-only provider with fixed output labelled `[TEST]`.
+- AI page edits return validated blocks only, are shown as a diff, and need an explicit "Apply" plus save and publish by the owner. Testimonial permission and case-study verification flags cannot be changed by AI.
+
 ## Security baseline (Phase 1)
 
-- No secrets or credentials exist in the project yet. `.env*` files are git-ignored; `.env.example` contains placeholders only.
-- Baseline headers: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`; `X-Powered-By` removed.
+- No secrets are stored in the project. `.env*` files are git-ignored; `.env.example` contains placeholders only.
+- Baseline headers: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options` (DENY, except the studio preview which is SAMEORIGIN), `Permissions-Policy`; `X-Powered-By` removed.
 - JSON-LD is serialised with `<` escaped.
 - A full Content-Security-Policy, authentication and Row Level Security arrive in Phase 3.

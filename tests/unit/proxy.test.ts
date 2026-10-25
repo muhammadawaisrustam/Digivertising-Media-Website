@@ -30,4 +30,11 @@ describe("language proxy", () => {
     expect(run("/services/made-up").headers.get("x-middleware-rewrite")).toBe("http://localhost:3000/en/__not-found");
     expect(run("/ar/services/made-up").headers.get("x-middleware-rewrite")).toBe("http://localhost:3000/ar/__not-found");
   });
+
+  it("keeps the private studio English-only", () => {
+    const res = run("/ar/studio/pages");
+    expect(res.status).toBe(308);
+    expect(res.headers.get("location")).toBe("http://localhost:3000/studio/pages");
+    expect(run("/studio").headers.get("x-middleware-rewrite")).toBe("http://localhost:3000/en/studio");
+  });
 });

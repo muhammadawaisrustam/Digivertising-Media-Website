@@ -43,7 +43,7 @@ test.describe("SEO foundations", () => {
     expect(xml).toContain("/services/seo</loc>");
     expect(xml).toContain("/ar/services/seo</loc>");
     expect(xml).toContain('hreflang="ar"');
-    expect((xml.match(/<url>/g) ?? []).length).toBe(2 * (4 + 24));
+    expect((xml.match(/<url>/g) ?? []).length).toBe(2 * (5 + 24)); // 5 main pages (incl. proposal assistant) + 24 services
   });
 
   test("robots.txt allows the site, blocks private areas and links the sitemap", async ({ request }) => {

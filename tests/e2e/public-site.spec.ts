@@ -114,7 +114,7 @@ test.describe("mobile navigation", () => {
   });
 
   test("no horizontal overflow on key pages", async ({ page }) => {
-    for (const path of ["/", "/services", "/services/seo", "/about", "/contact", "/ar", "/ar/services/seo"]) {
+    for (const path of ["/", "/services", "/services/seo", "/about", "/contact", "/request-a-proposal", "/ar", "/ar/services/seo", "/ar/request-a-proposal"]) {
       await page.goto(path);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, path).toBeLessThanOrEqual(1);
@@ -147,7 +147,7 @@ test.describe("3D hero fallback", () => {
 });
 
 test.describe("accessibility", () => {
-  for (const path of ["/", "/services", "/services/seo", "/contact", "/ar", "/ar/services/seo"]) {
+  for (const path of ["/", "/services", "/services/seo", "/about", "/contact", "/request-a-proposal", "/ar", "/ar/services/seo", "/ar/request-a-proposal", "/studio/login"]) {
     test(`no serious axe violations on ${path}`, async ({ page }) => {
       await page.goto(path);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();

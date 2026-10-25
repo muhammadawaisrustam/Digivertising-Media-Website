@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CheckIcon } from "@/components/ui/icons";
 import { PageHeader } from "@/components/ui/page-header";
 import { siteConfig } from "@/config/site";
+import { ContactForm } from "@/features/leads/contact-form";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { localizedPath } from "@/i18n/paths";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -35,15 +36,16 @@ export default async function ContactPage() {
         <div className="space-y-8 lg:col-span-7">
           <section aria-labelledby="form-heading" className="card p-6 md:p-8">
             <h2 id="form-heading" className="text-h3">{c.formHeading}</h2>
-            <p className="mt-3 leading-relaxed text-muted">{c.formPending}</p>
-            {siteConfig.contactEmail ? (
-              <p className="mt-6">
-                <span className="block text-sm text-subtle">{c.emailHeading}</span>
-                <a href={`mailto:${siteConfig.contactEmail}`} dir="ltr" className="text-lg font-semibold text-signal-300 hover:underline">
-                  {siteConfig.contactEmail}
-                </a>
-              </p>
-            ) : null}
+            <p className="mt-3 leading-relaxed text-muted">{c.formIntro}</p>
+            <div className="mt-6">
+              <ContactForm locale={locale} />
+            </div>
+            <p className="mt-8 border-t border-line pt-6 text-sm text-subtle">
+              {c.emailAlt}{" "}
+              <a href={`mailto:${siteConfig.contactEmail}`} dir="ltr" className="font-semibold text-signal-300 hover:underline">
+                {siteConfig.contactEmail}
+              </a>
+            </p>
           </section>
 
           <section aria-labelledby="prepare-heading">

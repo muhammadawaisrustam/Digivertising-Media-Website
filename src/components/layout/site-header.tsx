@@ -11,7 +11,7 @@ import { NavLinks } from "./nav-links";
 export function SiteHeader({ locale, t }: { locale: Locale; t: Dictionary }) {
   const items = getNavItems(locale, t);
   const other: Locale = locale === "en" ? "ar" : "en";
-  const cta = { href: localizedPath(locale, "/contact"), label: t.common.startProject };
+  const cta = { href: localizedPath(locale, "/request-a-proposal"), label: t.common.startProject };
   const switcher = <LanguageSwitcher target={other} label={t.common.switchTo} ariaLabel={t.common.switchToLabel} />;
 
   return (

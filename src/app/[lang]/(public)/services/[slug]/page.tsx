@@ -54,7 +54,7 @@ export default async function ServicePage({ params }: PageProps<"/[lang]/service
           ],
         }}
       >
-        <Link href={lp("/contact")} className="btn btn-primary mt-8">
+        <Link href={lp("/request-a-proposal")} className="btn btn-primary mt-8">
           {t.common.startProject}
           <ArrowIcon />
         </Link>
@@ -143,7 +143,7 @@ export default async function ServicePage({ params }: PageProps<"/[lang]/service
         </section>
       ) : null}
 
-      <CtaBand title={d.ctaTitle} text={d.ctaText} href={lp("/contact")} label={t.common.startProject} />
+      <CtaBand title={d.ctaTitle} text={d.ctaText} href={lp("/request-a-proposal")} label={t.common.startProject} />
     </>
   );
 }

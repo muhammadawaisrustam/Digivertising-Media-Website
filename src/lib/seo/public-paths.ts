@@ -9,6 +9,7 @@ export function publicPaths(): string[] {
     "/services",
     ...services.map((s) => `/services/${s.slug}`),
     "/contact",
+    "/request-a-proposal",
     ...(legalStatus.reviewed ? ["/privacy", "/terms"] : []),
   ];
 }

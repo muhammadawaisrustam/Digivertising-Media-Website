@@ -60,6 +60,7 @@ export async function SiteFooter({ locale, t }: { locale: Locale; t: Dictionary 
             <li><Link href={lp("/about")} className="text-muted hover:text-fg">{t.nav.about}</Link></li>
             <li><Link href={lp("/services")} className="text-muted hover:text-fg">{t.nav.services}</Link></li>
             <li><Link href={lp("/contact")} className="text-muted hover:text-fg">{t.nav.contact}</Link></li>
+            <li><Link href={lp("/request-a-proposal")} className="text-muted hover:text-fg">{t.proposalPage.eyebrow}</Link></li>
           </ul>
         </nav>
 

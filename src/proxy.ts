@@ -9,6 +9,7 @@ const NOT_FOUND_PATH = "/__not-found";
  * - /ar/...  -> served as-is (Arabic)
  * - /en/...  -> permanently redirected to the unprefixed URL (avoids duplicate pages)
  * - anything else -> internally rewritten to /en/... (English, no prefix in the URL)
+ * /ar/studio... -> redirected to /studio... (the private studio is English-only)
  * Unknown service slugs are sent to the 404 page so they return a real 404 status.
  *
  * Keep this file small: it runs before every page request.
@@ -19,6 +20,13 @@ export function proxy(request: NextRequest) {
   if (pathname === "/en" || pathname.startsWith("/en/")) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.slice(3) || "/";
+    return NextResponse.redirect(url, 308);
+  }
+
+  // The studio is English-only.
+  if (pathname === "/ar/studio" || pathname.startsWith("/ar/studio/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.slice(3);
     return NextResponse.redirect(url, 308);
   }
 
