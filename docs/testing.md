@@ -87,5 +87,5 @@ What was already done: phones skip the WebGL scene (the first mobile run, before
 ## Known limits of the test setup
 
 - WebGL in the cloud container is software-rendered, so 3D performance numbers here are pessimistic for real devices.
-- Storage is the local file store; Supabase and Row Level Security tests arrive in Phase 3.
+- The main browser suite runs in local mode (file storage, password login). Supabase mode has its own tests that run only against a local Supabase-compatible stack, never the live project: `tests/integration/` (storage and access rules through the real client), `playwright.supabase.config.ts` (accounts, roles, sign-out, enquiry storage) and `tests/db/rls-check.sql` (17 access-rule checks, rolled back). See `docs/supabase.md`.
 - Rate limits are in memory, so they reset when the server restarts and are per server instance.

@@ -1,6 +1,6 @@
 # Digivertising Media & PR: website and agency workspace
 
-The public website for Digivertising Media & PR (English and Arabic) and a private studio for editing pages and reading enquiries. Later phases add Supabase, a CRM and AI-assisted workflows.
+The public website for Digivertising Media & PR (English and Arabic) and a private studio for editing pages and reading enquiries. Data and studio accounts live in Supabase. Later phases add a CRM and AI-assisted workflows.
 
 ## Current status
 
@@ -15,7 +15,8 @@ The public website for Digivertising Media & PR (English and Arabic) and a priva
 | Contact form and step-by-step proposal assistant | Implemented and tested (English + Arabic) |
 | Private studio: page editor, preview, publish, history, enquiries list | Implemented and tested. Temporary password login |
 | AI page suggestions | Built and tested with a labelled test provider. Shows "Not configured" until a free provider is chosen |
-| Supabase database, accounts with roles, file uploads | Planned (Phase 3). Data is stored in local files until then |
+| Supabase database, accounts with roles | Done (Phase 3). Setup steps in `docs/supabase.md` |
+| Image uploads | Planned (later in Phase 3) |
 | AI agents, research, approvals dashboard | Planned (Phases 4 to 6) |
 | Deployment | Not deployed. Will only happen with the owner's approval |
 

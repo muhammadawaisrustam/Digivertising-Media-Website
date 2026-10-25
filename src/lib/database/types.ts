@@ -74,4 +74,14 @@ export interface LeadStore {
   listLeads(): Promise<LeadRecord[]>;
 }
 
+/** Read-only access to published pages, for the public website. */
+export interface PublicPageReader {
+  /** The published content as stored (validated by the caller), or null. */
+  getPublished(slug: string, locale: Locale): Promise<unknown | null>;
+  listPublishedLandingSlugs(locale: Locale): Promise<string[]>;
+}
+
+export type LeadWriter = Pick<LeadStore, "createLead">;
+
+/** Number of earlier versions shown and kept per page and language. */
 export const MAX_REVISIONS = 20;

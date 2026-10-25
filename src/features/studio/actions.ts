@@ -6,7 +6,8 @@ import { suggestPageEdit, MAX_INSTRUCTION, type PageEditSuggestion } from "@/fea
 import { localeEnum, pageLocaleContentSchema, pageSlugSchema, type PageLocaleContent } from "@/features/pages/schema";
 import { createLandingPage, discardDraft, getEditorState, pageTag, publishDraft, restoreRevision, saveDraft, type EditorState, type Result } from "@/features/pages/service";
 import { getAiProvider } from "@/lib/ai";
-import { assertStudio, endStudioSession, startStudioSession, studioAuthConfig, verifyStudioPassword } from "@/lib/auth/studio-auth";
+import { assertStudio, endStudioSession, startStudioSession, studioAuthConfig, studioAuthMode, verifyStudioPassword } from "@/lib/auth/studio-auth";
+import { createStudioClient } from "@/lib/supabase/clients";
 import { clientIp } from "@/lib/security/client-ip";
 import { rateLimit } from "@/lib/security/rate-limit";
 
@@ -30,6 +31,22 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   // LOGIN_RATE_LIMIT exists only so automated tests can raise it.
   if (!rateLimit(`login:${ip}`, Number(process.env.LOGIN_RATE_LIMIT) || 5, 15 * 60 * 1000).allowed) return { error: "Too many attempts. Please wait 15 minutes and try again." };
   const password = String(formData.get("password") ?? "");
+
+  if (studioAuthMode() === "supabase") {
+    const email = String(formData.get("email") ?? "").trim().toLowerCase();
+    if (!email || !password) return { error: "Enter your email and password." };
+    const client = await createStudioClient();
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    // One message for every failure, so the form does not reveal which emails have accounts.
+    if (error || !data.user) return { error: "Email or password is not correct." };
+    const { data: profile } = await client.from("profiles").select("role").eq("id", data.user.id).maybeSingle<{ role: string }>();
+    if (!profile || profile.role === "pending") {
+      await client.auth.signOut();
+      return { error: "Your account is waiting for the owner to give it access." };
+    }
+    redirect("/studio");
+  }
+
   if (!verifyStudioPassword(password)) return { error: "That password is not correct." };
   await startStudioSession();
   redirect("/studio");

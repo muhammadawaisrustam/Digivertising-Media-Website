@@ -4,14 +4,14 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Locale } from "@/i18n/config";
 import type { PageLocaleContent } from "@/features/pages/schema";
-import { MAX_REVISIONS, type LeadRecord, type LeadStore, type NewLead, type PageRecord, type PageStore } from "./types";
+import { MAX_REVISIONS, type LeadRecord, type LeadStore, type NewLead, type PageRecord, type PageStore, type PublicPageReader } from "./types";
 
 /**
  * Local JSON file storage for development and single-server use.
  * Data lives in DATA_DIR (default ./.data, git-ignored). Not suitable for
  * serverless hosting, where files are not persistent: use Supabase there.
  */
-export class FileStore implements PageStore, LeadStore {
+export class FileStore implements PageStore, LeadStore, PublicPageReader {
   private queue: Promise<unknown> = Promise.resolve();
 
   constructor(private readonly dir: string) {}
@@ -50,6 +50,17 @@ export class FileStore implements PageStore, LeadStore {
   async getPage(slug: string, locale: Locale) {
     const pages = await this.read<Record<string, PageRecord>>("pages", {});
     return pages[this.key(slug, locale)] ?? null;
+  }
+
+  async getPublished(slug: string, locale: Locale) {
+    return (await this.getPage(slug, locale))?.published ?? null;
+  }
+
+  async listPublishedLandingSlugs(locale: Locale) {
+    return (await this.listPages())
+      .filter((p) => p.locale === locale && p.published && p.slug !== "home" && p.slug !== "about")
+      .map((p) => p.slug)
+      .sort();
   }
 
   async listPages() {

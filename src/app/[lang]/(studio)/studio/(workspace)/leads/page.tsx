@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { getService } from "@/content/services";
-import { requireStudio } from "@/lib/auth/studio-auth";
-import { getStore } from "@/lib/database";
+import { ADMINS, requireStudio } from "@/lib/auth/studio-auth";
+import { getStudioStore } from "@/lib/database";
 
 export const metadata: Metadata = { title: "Leads" };
 
 export default async function StudioLeads() {
-  await requireStudio();
-  const leads = await getStore().listLeads();
+  await requireStudio(ADMINS);
+  const leads = await (await getStudioStore()).listLeads();
   return (
     <div className="space-y-6">
       <div>

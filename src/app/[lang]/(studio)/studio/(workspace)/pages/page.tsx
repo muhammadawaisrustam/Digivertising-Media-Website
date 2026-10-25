@@ -3,13 +3,14 @@ import Link from "next/link";
 import { CreatePageForm } from "@/features/studio/create-page-form";
 import { editablePages, isFixedPage, pagePath } from "@/features/pages/seed";
 import { listEditablePages } from "@/features/pages/service";
-import { requireStudio } from "@/lib/auth/studio-auth";
+import { EDITORS, hasRole, requireStudio } from "@/lib/auth/studio-auth";
 import { languageName } from "@/features/studio/labels";
 
 export const metadata: Metadata = { title: "Pages" };
 
 export default async function StudioPages() {
-  await requireStudio();
+  const user = await requireStudio();
+  const canEdit = hasRole(user, EDITORS);
   const pages = await listEditablePages();
   return (
     <div className="space-y-8">
@@ -49,6 +50,7 @@ export default async function StudioPages() {
           </tbody>
         </table>
       </div>
+      {canEdit ? (
       <section className="card p-6">
         <h2 className="text-h3">New landing page</h2>
         <p className="mt-1 text-sm text-muted">Starts as a draft with a heading and a call to action. It is not visible until you publish it.</p>
@@ -56,6 +58,7 @@ export default async function StudioPages() {
           <CreatePageForm />
         </div>
       </section>
+      ) : null}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import "server-only";
 import type { Locale } from "@/i18n/config";
-import { getStore } from "@/lib/database";
+import { getLeadWriter } from "@/lib/database";
 import type { LeadRecord } from "@/lib/database/types";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { qualifyProposal, type Qualification } from "./qualification";
@@ -31,7 +31,7 @@ export async function submitContact(raw: unknown, ip: string, now = Date.now()):
   if (!rateLimit(`lead:${ip}`, LIMIT.count, LIMIT.windowMs, now).allowed) return { ok: false, fieldErrors: {}, formError: "rate_limited" };
 
   try {
-    await getStore().createLead({
+    await getLeadWriter().createLead({
       source: "website_contact",
       locale: input.locale,
       name: input.name,
@@ -70,7 +70,7 @@ export async function submitProposal(raw: unknown, ip: string, now = Date.now())
 
   const qualification = qualifyProposal(input, input.locale as Locale);
   try {
-    const lead: LeadRecord = await getStore().createLead({
+    const lead: LeadRecord = await getLeadWriter().createLead({
       source: "website_proposal",
       locale: input.locale,
       name: input.name,

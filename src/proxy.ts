@@ -1,5 +1,7 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { serviceSlugs } from "@/content/services/slugs";
+import { supabaseConfig } from "@/lib/supabase/config";
 
 const knownServices = new Set<string>(serviceSlugs);
 const NOT_FOUND_PATH = "/__not-found";
@@ -11,10 +13,12 @@ const NOT_FOUND_PATH = "/__not-found";
  * - anything else -> internally rewritten to /en/... (English, no prefix in the URL)
  * /ar/studio... -> redirected to /studio... (the private studio is English-only)
  * Unknown service slugs are sent to the 404 page so they return a real 404 status.
+ * Studio requests with a Supabase session get the session refreshed here, because
+ * pages cannot write cookies themselves.
  *
  * Keep this file small: it runs before every page request.
  */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
 
   if (pathname === "/en" || pathname.startsWith("/en/")) {
@@ -45,7 +49,34 @@ export function proxy(request: NextRequest) {
 
   const url = request.nextUrl.clone();
   url.pathname = `/en${pathname === "/" ? "" : pathname}`;
+  if (pathname === "/studio" || pathname.startsWith("/studio/")) {
+    return refreshStudioSession(request, () => NextResponse.rewrite(url, { request: { headers: request.headers } }));
+  }
   return NextResponse.rewrite(url);
+}
+
+/** Refreshes an expiring Supabase sign-in and passes the new cookies to the page and the browser. */
+async function refreshStudioSession(request: NextRequest, makeResponse: () => NextResponse): Promise<NextResponse> {
+  const config = supabaseConfig();
+  // Nothing to refresh without Supabase or without a Supabase sign-in cookie.
+  if (!config || !request.cookies.getAll().some((c) => c.name.startsWith("sb-"))) return makeResponse();
+  let response = makeResponse();
+  const supabase = createServerClient(config.url, config.publishableKey, {
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll: (list) => {
+        for (const { name, value } of list) request.cookies.set(name, value);
+        response = makeResponse();
+        for (const { name, value, options } of list) response.cookies.set(name, value, options);
+      },
+    },
+  });
+  try {
+    await supabase.auth.getUser();
+  } catch (err) {
+    console.error("Studio session refresh failed", err);
+  }
+  return response;
 }
 
 export const config = {

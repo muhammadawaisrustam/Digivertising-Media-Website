@@ -37,10 +37,10 @@ describe("rate limit", () => {
 describe("lead submissions", () => {
   it("stores a valid contact message", async () => {
     const { submitContact } = await import("@/features/leads/service");
-    const { getStore } = await import("@/lib/database");
+    const { getFileStore } = await import("@/lib/database");
     const res = await submitContact(contact(), "1.1.1.1", NOW);
     expect(res.ok).toBe(true);
-    const leads = await getStore().listLeads();
+    const leads = await getFileStore().listLeads();
     expect(leads[0]).toMatchObject({ name: "Test Person", source: "website_contact", status: "new" });
   });
 

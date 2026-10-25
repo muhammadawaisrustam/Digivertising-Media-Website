@@ -1,7 +1,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import type { Locale } from "@/i18n/config";
-import { getStore } from "@/lib/database";
+import { getPublicReader, getStudioStore } from "@/lib/database";
 import type { PageRecord } from "@/lib/database/types";
 import { describeIssues, pageLocaleContentSchema, pageSlugSchema, type PageLocaleContent } from "./schema";
 import { blankLandingPage, isFixedPage, seedPage } from "./seed";
@@ -20,9 +20,9 @@ export async function getPublishedContent(slug: string, locale: Locale): Promise
   "use cache";
   cacheTag(pageTag(slug, locale));
   cacheLife("days");
-  const record = await getStore().getPage(slug, locale);
-  if (record?.published) {
-    const parsed = pageLocaleContentSchema.safeParse(record.published);
+  const published = await getPublicReader().getPublished(slug, locale);
+  if (published) {
+    const parsed = pageLocaleContentSchema.safeParse(published);
     if (parsed.success) return parsed.data;
     console.error(`Stored page ${slug}/${locale} failed validation; serving the built-in version.`);
   }
@@ -43,7 +43,7 @@ export type EditorState = {
 };
 
 export async function getEditorState(slug: string, locale: Locale): Promise<EditorState | null> {
-  const record = await getStore().getPage(slug, locale);
+  const record = await (await getStudioStore()).getPage(slug, locale);
   const builtIn = seedPage(slug, locale);
   const published = record?.published ?? builtIn;
   const working = record?.draft ?? published;
@@ -62,7 +62,7 @@ export async function getEditorState(slug: string, locale: Locale): Promise<Edit
 }
 
 export async function listEditablePages(): Promise<{ slug: string; locales: Locale[]; hasDraft: boolean; publishedAt: string | null }[]> {
-  const records = await getStore().listPages();
+  const records = await (await getStudioStore()).listPages();
   const map = new Map<string, { slug: string; locales: Locale[]; hasDraft: boolean; publishedAt: string | null }>();
   for (const slug of ["home", "about"]) map.set(slug, { slug, locales: ["en", "ar"], hasDraft: false, publishedAt: null });
   for (const r of records) {
@@ -80,7 +80,7 @@ export async function saveDraft(slug: string, locale: Locale, input: unknown): P
   if (!pageSlugSchema.safeParse(slug).success) return { ok: false, errors: ["Invalid page address."] };
   const parsed = pageLocaleContentSchema.safeParse(input);
   if (!parsed.success) return { ok: false, errors: describeIssues(parsed.error) };
-  await getStore().saveDraft(slug, locale, parsed.data);
+  await (await getStudioStore()).saveDraft(slug, locale, parsed.data);
   return { ok: true, value: parsed.data };
 }
 
@@ -89,30 +89,30 @@ export async function saveDraft(slug: string, locale: Locale, input: unknown): P
  * fails, nothing changes and the current live page stays as it is.
  */
 export async function publishDraft(slug: string, locale: Locale, note: string): Promise<Result<PageLocaleContent>> {
-  const record = await getStore().getPage(slug, locale);
+  const record = await (await getStudioStore()).getPage(slug, locale);
   if (!record?.draft) return { ok: false, errors: ["There is no saved draft to publish. Save your changes first."] };
   const parsed = pageLocaleContentSchema.safeParse(record.draft);
   if (!parsed.success) return { ok: false, errors: describeIssues(parsed.error) };
-  await getStore().publish(slug, locale, parsed.data, note.slice(0, 200) || "Published from the studio editor");
+  await (await getStudioStore()).publish(slug, locale, parsed.data, note.slice(0, 200) || "Published from the studio editor");
   return { ok: true, value: parsed.data };
 }
 
 /** Copies an earlier published version into the draft so it can be reviewed and re-published. */
 export async function restoreRevision(slug: string, locale: Locale, revisionId: string): Promise<Result<PageLocaleContent>> {
-  const record = await getStore().getPage(slug, locale);
+  const record = await (await getStudioStore()).getPage(slug, locale);
   const revision = record?.revisions.find((r) => r.id === revisionId);
   if (!revision) return { ok: false, errors: ["That version could not be found."] };
   return saveDraft(slug, locale, revision.content);
 }
 
 export async function discardDraft(slug: string, locale: Locale) {
-  await getStore().discardDraft(slug, locale);
+  await (await getStudioStore()).discardDraft(slug, locale);
 }
 
 export async function createLandingPage(slug: string, title: string, locale: Locale): Promise<Result<string>> {
   const s = pageSlugSchema.safeParse(slug);
   if (!s.success || isFixedPage(slug)) return { ok: false, errors: ["Use lowercase letters, numbers and hyphens, e.g. google-ads-audit."] };
-  if (await getStore().getPage(slug, locale)) return { ok: false, errors: ["A page with that address already exists."] };
+  if (await (await getStudioStore()).getPage(slug, locale)) return { ok: false, errors: ["A page with that address already exists."] };
   if (!title.trim()) return { ok: false, errors: ["Enter a page title."] };
   const result = await saveDraft(slug, locale, blankLandingPage(title.trim()));
   return result.ok ? { ok: true, value: slug } : result;
@@ -120,6 +120,5 @@ export async function createLandingPage(slug: string, title: string, locale: Loc
 
 /** Slugs of landing pages that have a published version in this language. */
 export async function listPublishedLandingSlugs(locale: Locale): Promise<string[]> {
-  const records = await getStore().listPages();
-  return records.filter((r) => r.locale === locale && r.published && !isFixedPage(r.slug)).map((r) => r.slug);
+  return getPublicReader().listPublishedLandingSlugs(locale);
 }

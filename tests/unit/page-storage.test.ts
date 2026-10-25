@@ -10,7 +10,7 @@ let dir: string;
 
 beforeAll(async () => {
   dir = await mkdtemp(path.join(tmpdir(), "dv-pages-"));
-  process.env.DATA_DIR = dir; // used by the page service (getStore)
+  process.env.DATA_DIR = dir; // used by the page service (getFileStore)
 });
 afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
@@ -58,7 +58,7 @@ describe("file store", () => {
 describe("page service", () => {
   it("rejects an invalid draft and never changes the live page", async () => {
     const service = await import("@/features/pages/service");
-    const { getStore } = await import("@/lib/database");
+    const { getFileStore } = await import("@/lib/database");
 
     expect((await service.saveDraft("about", "en", withTitle("Good live"))).ok).toBe(true);
     expect((await service.publishDraft("about", "en", "ok")).ok).toBe(true);
@@ -67,22 +67,22 @@ describe("page service", () => {
     expect(invalid.ok).toBe(false);
 
     // Even if a broken draft reaches storage, publishing refuses it.
-    await getStore().saveDraft("about", "en", withTitle("") as PageLocaleContent);
+    await getFileStore().saveDraft("about", "en", withTitle("") as PageLocaleContent);
     const publish = await service.publishDraft("about", "en", "should fail");
     expect(publish.ok).toBe(false);
-    const record = await getStore().getPage("about", "en");
+    const record = await getFileStore().getPage("about", "en");
     expect((record?.published?.blocks[0]?.data as { title: string }).title).toBe("Good live");
   });
 
   it("restores an earlier version into the draft only", async () => {
     const service = await import("@/features/pages/service");
-    const { getStore } = await import("@/lib/database");
+    const { getFileStore } = await import("@/lib/database");
     await service.saveDraft("about", "en", withTitle("Second live"));
     await service.publishDraft("about", "en", "second");
-    const record = await getStore().getPage("about", "en");
+    const record = await getFileStore().getPage("about", "en");
     const older = record!.revisions.find((r) => r.note === "ok")!;
     expect((await service.restoreRevision("about", "en", older.id)).ok).toBe(true);
-    const after = await getStore().getPage("about", "en");
+    const after = await getFileStore().getPage("about", "en");
     expect((after?.draft?.blocks[0]?.data as { title: string }).title).toBe("Good live");
     expect((after?.published?.blocks[0]?.data as { title: string }).title).toBe("Second live");
   });

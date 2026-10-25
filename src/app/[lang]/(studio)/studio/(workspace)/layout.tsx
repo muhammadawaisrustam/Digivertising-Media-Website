@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { logoutAction } from "@/features/studio/actions";
-import { isStudioSignedIn } from "@/lib/auth/studio-auth";
+import { ADMINS, getStudioUser, hasRole, STAFF } from "@/lib/auth/studio-auth";
 
 export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
-  const signedIn = await isStudioSignedIn();
+  const user = await getStudioUser();
+  const signedIn = hasRole(user, STAFF);
   return (
     <>
       <header className="border-b border-line bg-ink-900/60">
@@ -17,8 +18,9 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
             <nav aria-label="Studio" className="flex flex-wrap items-center gap-4 text-sm">
               <Link href="/studio" className="text-muted hover:text-fg">Dashboard</Link>
               <Link href="/studio/pages" className="text-muted hover:text-fg">Pages</Link>
-              <Link href="/studio/leads" className="text-muted hover:text-fg">Leads</Link>
+              {hasRole(user, ADMINS) ? <Link href="/studio/leads" className="text-muted hover:text-fg">Leads</Link> : null}
               <Link href="/" className="text-muted hover:text-fg" target="_blank" rel="noreferrer">View site ↗</Link>
+              <span className="text-xs text-subtle" data-testid="studio-user">{user?.email ? `${user.email} · ` : ""}{user?.role}</span>
               <form action={logoutAction}>
                 <button type="submit" className="rounded-full border border-line px-3 py-1 text-muted hover:text-fg">Sign out</button>
               </form>

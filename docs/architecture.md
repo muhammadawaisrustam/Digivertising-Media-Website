@@ -32,7 +32,8 @@ src/
   features/pages/             Block schema, built-in pages, page service, AI edit, diff
   features/leads/             Form schemas, rule-based qualification, form components
   features/studio/            Studio actions (all check the session) and editor UI
-  lib/database/               Storage interfaces + local file store (Supabase in Phase 3)
+  lib/database/               Storage interfaces, Supabase store and local file store
+  lib/supabase/               Supabase connections (public, signed-in user, server-only secret)
   lib/auth/                   Temporary studio login (signed httpOnly cookie)
   lib/ai/                     Provider-agnostic AI interface, test-only mock provider
   lib/security/               Rate limiting, client IP
@@ -79,7 +80,13 @@ Service content is typed and validated with Zod (`src/content/services/schema.ts
 - One owner password (`STUDIO_PASSWORD`) and an HMAC-signed, httpOnly, SameSite=Strict session cookie (12 hours, `SESSION_SECRET`). Login is rate limited (5 attempts per 15 minutes).
 - Every studio page calls `requireStudio()` and every studio server action calls `assertStudio()`; hiding UI is never the protection.
 - Studio responses send `X-Robots-Tag: noindex` and the robots meta tag; only the preview route may be framed, and only by the site itself.
-- Replaced by Supabase Auth with roles and Row Level Security in Phase 3.
+- This password mode is only used when Supabase is not configured (local development and tests).
+
+### Supabase mode (Phase 3)
+- Supabase Auth accounts (email + password). Roles live in `profiles`: pending (default, no access), viewer, editor, admin, owner.
+- Pages: `requireStudio(roles)`. Server actions: `assertStudio(roles)`. Editing needs editor or above, enquiries need admin or above.
+- The studio talks to the database as the signed-in user, so Row Level Security enforces the same roles again. The public site reads only through `published_page` and `published_landing_slugs`. The secret key is used on the server for one job: inserting validated enquiries.
+- `src/proxy.ts` refreshes Supabase sessions on `/studio` requests. Details and setup: `docs/supabase.md`.
 
 ## AI layer (Phase 2)
 

@@ -4,7 +4,7 @@ The studio is the private part of the site at `/studio`. In Phase 2 it lets the 
 
 ## 1. Set up the studio login (one time)
 
-The studio uses a temporary single-owner password until Supabase accounts arrive in Phase 3.
+With Supabase connected, everyone signs in with their own account and role: follow `docs/supabase.md`. The password steps below are only for local development without Supabase.
 
 1. In the project folder, copy `.env.example` to a new file called `.env.local`.
    - Mac/Linux: `cp .env.example .env.local`
@@ -83,7 +83,7 @@ Each page editor has an **AI suggestions** panel.
 
 ## Where the data lives (Phase 2)
 
-Drafts, published versions and enquiries are stored as JSON files in the `.data` folder (git-ignored). This is fine on your own computer, but **not** on serverless hosting, where files disappear. Supabase replaces it in Phase 3, before any deployment.
+Drafts, published versions and enquiries are stored as JSON files in the `.data` folder (git-ignored). This is fine on your own computer, but **not** on serverless hosting, where files disappear. With Supabase connected (`docs/supabase.md`) everything is stored in the database instead.
 
 ## For developers: adding a block type
 

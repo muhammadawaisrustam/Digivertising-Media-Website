@@ -7,13 +7,13 @@ import { getEditorState } from "@/features/pages/service";
 import { PageEditor } from "@/features/studio/editor/page-editor";
 import { localizedPath } from "@/i18n/paths";
 import { aiStatus } from "@/lib/ai";
-import { requireStudio } from "@/lib/auth/studio-auth";
+import { EDITORS, requireStudio } from "@/lib/auth/studio-auth";
 import { languageName } from "@/features/studio/labels";
 
 export const metadata: Metadata = { title: "Edit page" };
 
 export default async function EditPage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
-  await requireStudio();
+  await requireStudio(EDITORS);
   const { slug, locale } = await params;
   const s = pageSlugSchema.safeParse(slug);
   const l = localeEnum.safeParse(locale);

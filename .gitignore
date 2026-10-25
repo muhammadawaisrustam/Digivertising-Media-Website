@@ -51,3 +51,4 @@ next-env.d.ts
 /.data/
 /.data-e2e/
 /.data-e2e-noai/
+/.data-e2e-supabase/
