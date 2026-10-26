@@ -107,6 +107,43 @@ test.describe("studio", () => {
     expect(html.indexOf("Frequently asked questions")).toBeGreaterThan(html.indexOf("Ready to talk?"));
   });
 
+  test("uploads an image into an image block, and refuses files that are not images", async ({ page }, info) => {
+    const slug = `e2e-img-${info.project.name}-${Date.now()}`;
+    await signIn(page);
+    await page.goto("/studio/pages");
+    await page.getByLabel("Page title").fill("E2E image page");
+    await page.getByLabel(/^Address/).fill(slug);
+    await page.getByRole("button", { name: "Create draft" }).click();
+    await expect(page).toHaveURL(`/studio/pages/${slug}/en`);
+
+    await page.getByLabel("Block type to add").selectOption("imageText");
+    await page.getByRole("button", { name: "+ Add block" }).click();
+    const upload = page.getByLabel("Upload an image");
+
+    // An SVG with a script, renamed to .png, is refused.
+    await upload.setInputFiles({ name: "evil.png", mimeType: "image/png", buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>') });
+    await expect(page.getByText("Only JPG, PNG, WebP or AVIF images can be uploaded.")).toBeVisible();
+
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==", "base64");
+    await upload.setInputFiles({ name: "pixel.png", mimeType: "image/png", buffer: png });
+    await expect(page.getByText("Image uploaded.")).toBeVisible();
+    const address = page.getByLabel(/^Image address/);
+    await expect(address).toHaveValue(/^\/media\/[0-9a-f-]{36}\.png$/);
+    await expect(page.getByTestId("image-preview")).toBeVisible();
+
+    const res = await page.request.get(await address.inputValue());
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toBe("image/png");
+    expect(res.headers()["x-content-type-options"]).toBe("nosniff");
+    expect((await page.request.get("/media/..%2F..%2Fpackage.json")).status()).toBe(404);
+
+    await page.getByLabel(/^Alt text/).fill("A single test pixel");
+    await page.getByLabel(/^Heading/).last().fill("Image block heading");
+    await page.getByLabel(/^Text/).last().fill("Text beside the test image.");
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Draft saved" })).toBeVisible();
+  });
+
   test("AI suggestions are shown as a diff and only change the editor when applied", async ({ page }) => {
     await signIn(page);
     await page.goto("/studio/pages/about/en");

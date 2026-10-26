@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { suggestPageEdit, MAX_INSTRUCTION, type PageEditSuggestion } from "@/features/pages/ai-edit";
 import { localeEnum, pageLocaleContentSchema, pageSlugSchema, type PageLocaleContent } from "@/features/pages/schema";
 import { createLandingPage, discardDraft, getEditorState, pageTag, publishDraft, restoreRevision, saveDraft, type EditorState, type Result } from "@/features/pages/service";
+import { uploadImage, type UploadResult } from "@/features/media/service";
 import { getAiProvider } from "@/lib/ai";
 import { assertStudio, endStudioSession, startStudioSession, studioAuthConfig, studioAuthMode, verifyStudioPassword } from "@/lib/auth/studio-auth";
 import { createStudioClient } from "@/lib/supabase/clients";
@@ -128,4 +129,13 @@ export async function aiSuggestAction(slug: string, locale: string, content: Pag
     console.error("AI page edit failed", err);
     return { ok: false, reason: "failed", message: "The AI response could not be used (it failed or did not match the page format). Nothing was changed." };
   }
+}
+
+/** Uploads one image for the editor and returns its address. Editors and above only. */
+export async function uploadImageAction(formData: FormData): Promise<UploadResult> {
+  await assertStudio();
+  const ip = await clientIp();
+  if (!rateLimit(`upload:${ip}`, 60, 60 * 60 * 1000).allowed) return { ok: false, error: "Too many uploads. Please wait a while and try again." };
+  const file = formData.get("file");
+  return uploadImage(file instanceof File ? file : null);
 }

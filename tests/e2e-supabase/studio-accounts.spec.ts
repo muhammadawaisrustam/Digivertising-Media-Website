@@ -56,6 +56,26 @@ test.describe("studio accounts (Supabase mode, local stack)", () => {
     await expect(page.getByTestId("revisions").getByRole("listitem")).toHaveCount(1);
   });
 
+  test("editor uploads an image to Supabase Storage from the page editor", async ({ page }) => {
+    await signIn(page, accounts().editor);
+    await expect(page).toHaveURL(/\/studio$/);
+    const slug = `sb-img-${Date.now()}`;
+    await page.goto("/studio/pages");
+    await page.getByLabel("Page title").fill("Supabase image page");
+    await page.getByLabel(/^Address/).fill(slug);
+    await page.getByRole("button", { name: "Create draft" }).click();
+    await expect(page).toHaveURL(`/studio/pages/${slug}/en`);
+    await page.getByLabel("Block type to add").selectOption("imageText");
+    await page.getByRole("button", { name: "+ Add block" }).click();
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==", "base64");
+    await page.getByLabel("Upload an image").setInputFiles({ name: "pixel.png", mimeType: "image/png", buffer: png });
+    await expect(page.getByText("Image uploaded.")).toBeVisible();
+    const address = page.getByLabel(/^Image address/);
+    await expect(address).toHaveValue(/\/storage\/v1\/object\/public\/media\/uploads\/\d{4}-\d{2}\/[0-9a-f-]{36}\.png$/);
+    const res = await page.request.get(await address.inputValue());
+    expect(res.status()).toBe(200);
+  });
+
   test("viewer can look at pages but cannot open the editor or create pages", async ({ page }) => {
     await signIn(page, accounts().viewer);
     await expect(page).toHaveURL(/\/studio$/);

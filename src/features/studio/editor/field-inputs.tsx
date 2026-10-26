@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { uploadImageAction } from "../actions";
 import type { Field, ItemField } from "./block-fields";
 
 /** Form controls used by the block editor. Values are plain JSON. */
@@ -126,11 +127,47 @@ export function LinkInput({ label, value, optional, onChange, errors }: { label:
 }
 
 export function ImageInput({ value, onChange, errors }: { value: { src: string; alt: string }; onChange: (v: { src: string; alt: string }) => void; errors: Record<string, string> }) {
+  const id = useId();
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+
+  async function upload(file: File | undefined, input: HTMLInputElement) {
+    if (!file) return;
+    setUploading(true);
+    setMessage(null);
+    const data = new FormData();
+    data.set("file", file);
+    try {
+      const result = await uploadImageAction(data);
+      if (result.ok) {
+        onChange({ ...value, src: result.url });
+        setMessage({ kind: "ok", text: "Image uploaded. Add alt text, then save the draft." });
+      } else {
+        setMessage({ kind: "error", text: result.error });
+      }
+    } catch {
+      setMessage({ kind: "error", text: "The image could not be uploaded. Check the file is under 5 MB and try again." });
+    } finally {
+      setUploading(false);
+      input.value = "";
+    }
+  }
+
   return (
     <fieldset className="rounded-lg border border-line p-3">
       <legend className="px-1 text-sm font-medium text-fg">Image</legend>
       <div className="grid gap-3">
-        <TextInput label="Image address" hint="A file in /public (e.g. /images/team.jpg) or an https:// address. Uploads come with Supabase storage." value={value.src} required dir="ltr" onChange={(v) => onChange({ ...value, src: v })} error={errors.src} />
+        <div>
+          <label htmlFor={`${id}-upload`} className="text-sm font-medium text-fg">Upload an image</label>
+          <p className="text-xs text-subtle">JPG, PNG, WebP or AVIF, up to 5 MB. Uploaded images can be seen by anyone who has the address.</p>
+          <input id={`${id}-upload`} type="file" accept="image/jpeg,image/png,image/webp,image/avif" disabled={uploading} onChange={(e) => upload(e.target.files?.[0], e.target)} className="mt-1.5 block w-full text-sm text-muted file:me-3 file:rounded-full file:border file:border-line-strong file:bg-ink-900 file:px-3 file:py-1.5 file:text-fg" />
+          <p role="status" className={`mt-1 text-xs ${message?.kind === "error" ? "text-danger" : "text-muted"}`}>{uploading ? "Uploading…" : message?.text ?? ""}</p>
+        </div>
+        <TextInput label="Image address" hint="Filled in by the upload, or use a file in /public (e.g. /images/team.jpg) or an https:// address." value={value.src} required dir="ltr" onChange={(v) => onChange({ ...value, src: v })} error={errors.src} />
+        {value.src && /^(\/|https:\/\/)/.test(value.src) ? (
+          // eslint-disable-next-line @next/next/no-img-element -- small editor preview of any allowed address
+          <img src={value.src} alt="" className="max-h-32 w-auto rounded-md border border-line object-contain" data-testid="image-preview" />
+        ) : null}
         <TextInput label="Alt text (describe the image for screen readers)" value={value.alt} max={200} onChange={(v) => onChange({ ...value, alt: v })} error={errors.alt} />
       </div>
     </fieldset>

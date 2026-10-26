@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 (Phase 3, part 2) - 2026-10-26
+
+### Added
+- Image uploads in the page editor (Image and text block): JPG, PNG, WebP or AVIF up to 5 MB, checked by file content (SVG refused), with a preview. Stored in a public Supabase Storage bucket `media` that only editors and above can upload to; in local mode stored in `.data/uploads`.
+- Storage access-rule check (13 points), passed locally and on the live project (rolled back). Upload tests in unit, integration and both browser suites.
+
 ## 0.3.0 (Phase 3, part 1) - 2026-10-25
 
 ### Added

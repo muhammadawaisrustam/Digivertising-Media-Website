@@ -87,6 +87,7 @@ Service content is typed and validated with Zod (`src/content/services/schema.ts
 - Pages: `requireStudio(roles)`. Server actions: `assertStudio(roles)`. Editing needs editor or above, enquiries need admin or above.
 - The studio talks to the database as the signed-in user, so Row Level Security enforces the same roles again. The public site reads only through `published_page` and `published_landing_slugs`. The secret key is used on the server for one job: inserting validated enquiries.
 - `src/proxy.ts` refreshes Supabase sessions on `/studio` requests. Details and setup: `docs/supabase.md`.
+- Image uploads (`src/features/media/`): the upload action checks the role, size (5 MB) and real file type (magic bytes; no SVG), then stores the file in the public `media` bucket as the signed-in user (storage access rules: editors+ into `uploads/` only, no update or delete). Local mode writes to `DATA_DIR/uploads`, served by `src/app/media/[file]/route.ts` with strict name checks.
 
 ## AI layer (Phase 2)
 

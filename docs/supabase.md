@@ -60,7 +60,16 @@ To change someone's role, use the same SQL as above with `'viewer'`, `'editor'` 
 
 These rules are enforced twice: by the website, and again by the database itself, so even a bug in the site cannot show enquiries to an editor.
 
-## 4. What is where
+## 4. Image uploads
+
+Editors, admins and the owner can upload images in the page editor (the **Image and text** block). Uploads go to the **media** storage bucket in Supabase:
+
+- JPG, PNG, WebP or AVIF only, up to 5 MB. SVG is refused because it can contain scripts. The site checks the file's real content, not just its name.
+- Images are **public**: anyone with the address can view them, because they appear on public pages. Do not upload anything private.
+- Files can't be renamed or deleted from the website yet. To remove one, use **Storage → media** in the Supabase dashboard.
+- Without Supabase (local mode), uploads are saved in `.data/uploads` and served from `/media/...`.
+
+## 5. What is where
 
 - `supabase/migrations/`: the database structure and access rules, in the order they were applied.
 - `src/lib/supabase/`: the three connections (public visitor, signed-in studio user, server-only secret key).
@@ -68,8 +77,10 @@ These rules are enforced twice: by the website, and again by the database itself
 - `src/lib/auth/studio-auth.ts`: sign-in and role checks.
 - `src/proxy.ts`: keeps studio sign-ins fresh.
 - `tests/db/rls-check.sql`: 17 access-rule checks. It rolls everything back, so it is safe to run on the live project (it was, on 2026-10-25: 17/17 passed).
+- `tests/db/media-rls-check.sql`: 13 checks for image uploads, also rolled back (live project, 2026-10-26: 13/13 passed).
+- `src/features/media/`: upload checks and storage.
 
-## 5. Hosting notes (for later)
+## 6. Hosting notes (for later)
 
 When the site is deployed, set the same three values in the hosting provider's environment settings (the secret key as a private/encrypted value). Set them **before** the build runs, because public pages are prepared during the build.
 
@@ -77,8 +88,8 @@ When the site is deployed, set the same three values in the hosting provider's e
 
 Automated Supabase tests never touch the live project. They run against a local, Supabase-compatible stack (Postgres 16, the Supabase Auth server and PostgREST behind `scripts/local-supabase/gateway.mjs`). The steps used in development:
 
-1. Start Postgres and apply every file in `supabase/migrations/` in order.
-2. Start the Auth server, PostgREST and `node scripts/local-supabase/gateway.mjs` (port 54330).
+1. Start Postgres, run `scripts/local-supabase/storage-stub.sql` (a minimal stand-in for Supabase's storage tables), then apply every file in `supabase/migrations/` in order.
+2. Start the Auth server, PostgREST (with `db-schemas = "public,storage"`) and `node scripts/local-supabase/gateway.mjs` (port 54330). The gateway includes a tiny storage stand-in that records each upload through the database as the signed-in user, so the real storage access rules are tested. It does not enforce the bucket's size and type limits; the site checks those itself.
 3. Print local-only keys with `node scripts/local-supabase/keys.mjs`.
 4. Run:
    ```

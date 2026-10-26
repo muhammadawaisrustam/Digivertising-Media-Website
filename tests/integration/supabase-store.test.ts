@@ -100,6 +100,23 @@ describe.skipIf(!enabled)("Supabase storage (local stack)", () => {
     expect(leads.some((l) => l.id === created.id)).toBe(true);
   });
 
+  it("lets editors upload images to the media bucket, and refuses viewers", async () => {
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==", "base64");
+    const editor = (await signedIn(emails.editor)).client;
+    const key = `uploads/itest/${run}.png`;
+    const ok = await editor.storage.from("media").upload(key, png, { contentType: "image/png", upsert: false });
+    expect(ok.error).toBeNull();
+    const res = await fetch(editor.storage.from("media").getPublicUrl(key).data.publicUrl);
+    expect(res.status).toBe(200);
+    expect(Buffer.from(await res.arrayBuffer()).equals(png)).toBe(true);
+
+    const outside = await editor.storage.from("media").upload(`elsewhere/${run}.png`, png, { contentType: "image/png" });
+    expect(outside.error).not.toBeNull();
+    const viewer = (await signedIn(emails.viewer)).client;
+    const refused = await viewer.storage.from("media").upload(`uploads/itest/${run}-viewer.png`, png, { contentType: "image/png" });
+    expect(refused.error).not.toBeNull();
+  });
+
   it("stops a user from making themselves owner", async () => {
     const { client, id } = await signedIn(emails.editor);
     await client.from("profiles").update({ role: "owner" }).eq("id", id);

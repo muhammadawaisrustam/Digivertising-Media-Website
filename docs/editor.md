@@ -55,7 +55,7 @@ On the **Pages** screen, fill in a title and an address such as `google-ads-audi
 | --- | --- | --- |
 | Hero | Main heading, intro, up to two buttons, short facts | One per page. Visual: 3D globe or a simple header |
 | Text | Heading and paragraphs | Separate paragraphs with an empty line |
-| Image and text | An image beside text and an optional button | Image must be a file in `/public` or an `https://` address. Uploads come with Supabase storage |
+| Image and text | An image beside text and an optional button | Use **Upload an image** (JPG, PNG, WebP or AVIF, up to 5 MB), or type a file in `/public` or an `https://` address. Always add alt text |
 | Services | Interactive explorer or a grid of service cards | Can be limited to chosen categories |
 | Feature list | Up to 12 cards with title and text | |
 | Process steps | 2 to 8 numbered steps | |

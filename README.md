@@ -16,7 +16,7 @@ The public website for Digivertising Media & PR (English and Arabic) and a priva
 | Private studio: page editor, preview, publish, history, enquiries list | Implemented and tested. Temporary password login |
 | AI page suggestions | Built and tested with a labelled test provider. Shows "Not configured" until a free provider is chosen |
 | Supabase database, accounts with roles | Done (Phase 3). Setup steps in `docs/supabase.md` |
-| Image uploads | Planned (later in Phase 3) |
+| Image uploads in the page editor | Done (Phase 3) |
 | AI agents, research, approvals dashboard | Planned (Phases 4 to 6) |
 | Deployment | Not deployed. Will only happen with the owner's approval |
 
